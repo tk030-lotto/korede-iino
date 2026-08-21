@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Checklist & Meter Styles (Single Responsibility Split)
+   ========================================================================== */
+
+.checklist-container { display: flex; flex-direction: column; gap: 12px; }
+.checklist-card {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  transition: var(--transition);
+  position: relative;
+}
+.checklist-card:hover { border-color: var(--border-hover); }
+.checklist-card.status-checked { border-color: var(--success-border); background-color: rgba(16, 185, 129, 0.04); }
+.checklist-card.status-issue { border-color: var(--danger-border); background-color: rgba(239, 68, 68, 0.04); }
+.checklist-card.status-unknown { border-color: var(--warning-border); background-color: rgba(245, 158, 11, 0.04); }
+
+.checklist-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.checklist-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.category-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+.checklist-item-title { font-size: 0.92rem; font-weight: 600; color: var(--text-main); }
+.checklist-item-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+.btn-item-delete {
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-item-delete:hover { color: #f87171; background-color: var(--danger-subtle); }
+
+.checklist-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.check-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.check-btn:hover { background-color: var(--bg-card-hover); color: var(--text-main); }
+.check-btn.active.btn-check-success { background-color: var(--success-subtle); border-color: var(--success); color: #34d399; font-weight: 600; }
+.check-btn.active.btn-check-danger { background-color: var(--danger-subtle); border-color: var(--danger); color: #f87171; font-weight: 600; }
+.check-btn.active.btn-check-warning { background-color: var(--warning-subtle); border-color: var(--warning); color: #fbbf24; font-weight: 600; }
+
+.checklist-inline-issue {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+  animation: fadeIn 0.2s ease;
+}
+.inline-input-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block; }
+
+.checklist-meter-container {
+  margin-bottom: 12px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+.meter-header { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+.meter-bar { width: 100%; height: 6px; background-color: var(--bg-subtle); border-radius: var(--radius-full); overflow: hidden; }
+.meter-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: var(--radius-full); transition: width 0.3s ease; }
+
+.add-custom-item-section { margin-top: 8px; border-top: 1px dashed var(--border-subtle); padding-top: 12px; }
+.add-item-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--primary); cursor: pointer; }
+.add-item-toggle:hover { text-decoration: underline; }
+.add-custom-form { display: flex; gap: 8px; margin-top: 8px; }
+.add-custom-form.hidden { display: none; }
