@@ -1,73 +1,20 @@
 /**
- * これでいいの？ - AI開発チェックアシスタント
- * Pure Vanilla JavaScript Application Logic
+ * これでいいの？ - AI開発チェックアシスタント (app.js)
+ * Zero-Dependency Pure Vanilla JavaScript
  */
-
 (function () {
   'use strict';
 
-  // ==========================================================================
-  // Application State
-  // ==========================================================================
-  const state = {
-    currentStep: 0, // 0: Hero, 1: Input, 2: Prompt, 3: Checklist, 4: Result
-    product: '',
-    purpose: '',
-    checklist: [
-      {
-        id: 'chk-purpose',
-        category: '目的',
-        title: '当初の目的を達成しているか',
-        desc: '最初にやりたかった本来の目的が、実際にこのツールで実現できていますか？',
-        status: 'none', // 'none' | 'checked' | 'issue' | 'unknown'
-        issueDetail: ''
-      },
-      {
-        id: 'chk-feature',
-        category: '機能',
-        title: '必要な機能があり、余計な機能がないか',
-        desc: '欲しかった機能が揃っているか、逆にAIが勝手に追加した不要な機能がないか確認します。',
-        status: 'none',
-        issueDetail: ''
-      },
-      {
-        id: 'chk-input',
-        category: '入力',
-        title: '想定したデータ・操作を受け付けられるか',
-        desc: '普通のデータだけでなく、空欄や少し変わった形式を入力しても破綻しませんか？',
-        status: 'none',
-        issueDetail: ''
-      },
-      {
-        id: 'chk-output',
-        category: '出力',
-        title: '期待通りの結果が分かりやすく得られるか',
-        desc: '処理結果や出力内容が正しいか、文字化けや表示崩れがないか確認します。',
-        status: 'none',
-        issueDetail: ''
-      },
-      {
-        id: 'chk-operation',
-        category: '操作',
-        title: '迷わずスムーズに操作できるか',
-        desc: 'ボタンの配置や画面の流れが直感的で、ストレスなく動かせるか確認します。',
-        status: 'none',
-        issueDetail: ''
-      },
-      {
-        id: 'chk-error',
-        category: 'エラー',
-        title: '失敗・エラー時に分かりやすい案内が出るか',
-        desc: '意図しない操作をしたときに、画面が固まったりせず原因が分かりますか？',
-        status: 'none',
-        issueDetail: ''
-      }
-    ]
-  };
+  const defaultItems = [
+    { id: 'chk-purpose', category: '目的', title: '当初の目的を達成しているか', desc: 'やりたかった本来の目的が実際に実現できていますか？', status: 'none', issueDetail: '' },
+    { id: 'chk-feature', category: '機能', title: '必要な機能があり、余計な機能がないか', desc: '欲しかった機能が揃っているか、不要な機能がないか確認します。', status: 'none', issueDetail: '' },
+    { id: 'chk-input', category: '入力', title: '想定したデータ・操作を受け付けられるか', desc: '通常のデータだけでなく、空欄や特殊な形式でも破綻しませんか？', status: 'none', issueDetail: '' },
+    { id: 'chk-output', category: '出力', title: '期待通りの結果が分かりやすく得られるか', desc: '計算や変換結果が正しいか、表示崩れがないか確認します。', status: 'none', issueDetail: '' },
+    { id: 'chk-operation', category: '操作', title: '迷わずスムーズに操作できるか', desc: 'ボタン配置や画面の流れが直感的で、ストレスなく動かせますか？', status: 'none', issueDetail: '' },
+    { id: 'chk-error', category: 'エラー', title: '失敗・エラー時に分かりやすい案内が出るか', desc: '間違った操作をした時に、画面が固まらず原因が分かりますか？', status: 'none', issueDetail: '' }
+  ];
 
-  // ==========================================================================
-  // DOM Element References
-  // ==========================================================================
+  const state = { currentStep: 0, product: '', purpose: '', checklist: JSON.parse(JSON.stringify(defaultItems)) };
   const screens = {
     hero: document.getElementById('screen-hero'),
     input: document.getElementById('screen-input'),
@@ -78,144 +25,67 @@
 
   const progressContainer = document.getElementById('progress-container');
   const stepIndicators = document.querySelectorAll('.step-indicator');
-
-  // Input screen elements
   const inputProduct = document.getElementById('input-product');
   const inputPurpose = document.getElementById('input-purpose');
   const step1NextBtn = document.getElementById('step1-next-btn');
-
-  // Prompt screen elements
   const aiCheckPrompt = document.getElementById('ai-check-prompt');
-  const copyPromptBtn = document.getElementById('copy-prompt-btn');
-  const step2BackBtn = document.getElementById('step2-back-btn');
-  const step2NextBtn = document.getElementById('step2-next-btn');
-
-  // Checklist screen elements
+  const aiFixPrompt = document.getElementById('ai-fix-prompt');
   const checklistContainer = document.getElementById('checklist-items');
   const checkedCountEl = document.getElementById('checked-count');
   const totalCountEl = document.getElementById('total-count');
-  const step3BackBtn = document.getElementById('step3-back-btn');
-  const step3NextBtn = document.getElementById('step3-next-btn');
-  const toggleAddCustom = document.getElementById('toggle-add-custom');
-  const customItemForm = document.getElementById('custom-item-form');
-  const customItemTitle = document.getElementById('custom-item-title');
-  const addCustomBtn = document.getElementById('add-custom-btn');
-
-  // Result screen elements
-  const resultSuccessContainer = document.getElementById('result-success-container');
-  const resultIssuesContainer = document.getElementById('result-issues-container');
-  const issueCountTag = document.getElementById('issue-count-tag');
-  const unknownCountTag = document.getElementById('unknown-count-tag');
-  const issueInputsContainer = document.getElementById('issue-inputs-container');
-  const aiFixPrompt = document.getElementById('ai-fix-prompt');
-  const copyFixPromptBtn = document.getElementById('copy-fix-prompt-btn');
-  const step4BackBtn = document.getElementById('step4-back-btn');
-  const step4RestartBtn = document.getElementById('step4-restart-btn');
-  const finishBtn = document.getElementById('finish-btn');
-
-  // Common elements
-  const heroStartBtn = document.getElementById('hero-start-btn');
-  const resetBtn = document.getElementById('reset-btn');
+  const meterPercent = document.getElementById('meter-percent');
+  const meterFill = document.getElementById('meter-fill');
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toast-text');
 
-  // ==========================================================================
-  // Helper Functions
-  // ==========================================================================
-  function showToast(message) {
-    if (toastText) toastText.textContent = message;
+  function showToast(msg) {
+    if (toastText) toastText.textContent = msg;
     toast.classList.remove('hidden');
-    setTimeout(() => {
-      toast.classList.add('hidden');
-    }, 2400);
+    setTimeout(() => toast.classList.add('hidden'), 2200);
   }
 
-  function copyToClipboard(text, successMsg = 'クリップボードにコピーしました！') {
+  function copyText(text, msg) {
     if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-      showToast(successMsg);
-    }).catch(() => {
-      // フォールバック
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
+    navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
       document.execCommand('copy');
-      document.body.removeChild(textarea);
-      showToast(successMsg);
+      document.body.removeChild(ta);
+      showToast(msg);
     });
-  }
-
-  function updateProgressBar() {
-    if (state.currentStep === 0) {
-      progressContainer.classList.remove('visible');
-    } else {
-      progressContainer.classList.add('visible');
-      stepIndicators.forEach((indicator) => {
-        const stepNum = parseInt(indicator.getAttribute('data-step'), 10);
-        const currentActive = state.currentStep - 1; // Step 1 is index 0
-        indicator.classList.remove('active', 'completed');
-        if (stepNum === currentActive) {
-          indicator.classList.add('active');
-        } else if (stepNum < currentActive) {
-          indicator.classList.add('completed');
-        }
-      });
-    }
   }
 
   function switchScreen(step) {
     state.currentStep = step;
-    Object.values(screens).forEach((screen) => screen.classList.remove('active'));
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    if (step === 0) screens.hero.classList.add('active');
+    if (step === 1) { screens.input.classList.add('active'); validateStep1(); }
+    if (step === 2) { generateCheckPrompt(); screens.prompt.classList.add('active'); }
+    if (step === 3) { renderChecklist(); screens.checklist.classList.add('active'); }
+    if (step === 4) { renderResultScreen(); screens.result.classList.add('active'); }
 
-    switch (step) {
-      case 0:
-        screens.hero.classList.add('active');
-        break;
-      case 1:
-        screens.input.classList.add('active');
-        validateStep1Input();
-        break;
-      case 2:
-        generateCheckPrompt();
-        screens.prompt.classList.add('active');
-        break;
-      case 3:
-        renderChecklist();
-        screens.checklist.classList.add('active');
-        break;
-      case 4:
-        renderResultScreen();
-        screens.result.classList.add('active');
-        break;
-    }
-
-    updateProgressBar();
+    progressContainer.classList.toggle('visible', step > 0);
+    stepIndicators.forEach(ind => {
+      const num = parseInt(ind.getAttribute('data-step'), 10);
+      ind.classList.remove('active', 'completed');
+      if (num === step - 1) ind.classList.add('active');
+      else if (num < step - 1) ind.classList.add('completed');
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ==========================================================================
-  // Step 1: Input Handling & Validation
-  // ==========================================================================
-  function validateStep1Input() {
-    const isValid = inputProduct.value.trim() !== '' && inputPurpose.value.trim() !== '';
-    step1NextBtn.disabled = !isValid;
+  function validateStep1() {
+    step1NextBtn.disabled = !(inputProduct.value.trim() && inputPurpose.value.trim());
   }
+  inputProduct.addEventListener('input', validateStep1);
+  inputPurpose.addEventListener('input', validateStep1);
 
-  inputProduct.addEventListener('input', validateStep1Input);
-  inputPurpose.addEventListener('input', validateStep1Input);
-
-  // Preset Tags
-  document.querySelectorAll('.preset-tag').forEach((btn) => {
+  document.querySelectorAll('.preset-tag').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target');
-      const val = btn.getAttribute('data-value');
-      const targetEl = document.getElementById(targetId);
-      if (targetEl) {
-        targetEl.value = val;
-        targetEl.dispatchEvent(new Event('input'));
-        targetEl.focus();
-      }
+      const el = document.getElementById(btn.getAttribute('data-target'));
+      if (el) { el.value = btn.getAttribute('data-value'); el.dispatchEvent(new Event('input')); el.focus(); }
     });
   });
 
@@ -225,11 +95,8 @@
     switchScreen(2);
   });
 
-  // ==========================================================================
-  // Step 2: AI Check Prompt Generation
-  // ==========================================================================
   function generateCheckPrompt() {
-    const promptText = `以下のソフトウェア（作成物）をAIに作ってもらいました。
+    aiCheckPrompt.value = `以下のソフトウェア（作成物）をAIに作ってもらいました。
 ソースコードを読むのではなく、「実際に動かして動作確認を行うためのチェック項目リスト」を作成してください。
 
 【作成したもの】
@@ -246,199 +113,145 @@ ${state.purpose}
 5. 操作手順に不自然な点や使いにくさがないか
 6. エラー発生時に分かりやすいメッセージが出るか
 
-実際に操作しながら1つずつチェックできるよう、分かりやすい箇条書きで教えてください。`;
-
-    aiCheckPrompt.value = promptText;
+実際に操作しながら1つずつチェックできるよう、分かりやすい箇条書きで具体的に教えてください。`;
   }
 
-  copyPromptBtn.addEventListener('click', () => {
-    copyToClipboard(aiCheckPrompt.value, 'AIへの質問文をコピーしました！');
-  });
+  document.getElementById('copy-prompt-btn').addEventListener('click', () => copyText(aiCheckPrompt.value, 'AIへの質問文をコピーしました！'));
+  document.getElementById('reset-prompt-btn').addEventListener('click', () => { generateCheckPrompt(); showToast('初期文に戻しました'); });
+  document.getElementById('step2-back-btn').addEventListener('click', () => switchScreen(1));
+  document.getElementById('step2-next-btn').addEventListener('click', () => switchScreen(3));
 
-  step2BackBtn.addEventListener('click', () => switchScreen(1));
-  step2NextBtn.addEventListener('click', () => switchScreen(3));
-
-  // ==========================================================================
-  // Step 3: Checklist Rendering & Interaction
-  // ==========================================================================
   function renderChecklist() {
     checklistContainer.innerHTML = '';
-    let checkedCount = 0;
+    let completedCount = 0;
 
-    state.checklist.forEach((item, index) => {
-      if (item.status === 'checked') checkedCount++;
-
+    state.checklist.forEach(item => {
+      if (item.status !== 'none') completedCount++;
       const card = document.createElement('div');
       card.className = `checklist-card status-${item.status}`;
-      card.id = `card-${item.id}`;
+      const isCustom = item.id.startsWith('custom-');
 
       card.innerHTML = `
         <div class="checklist-card-top">
           <div>
-            <div class="checklist-meta">
-              <span class="category-tag">${escapeHtml(item.category)}</span>
-            </div>
+            <div class="checklist-meta"><span class="category-tag">${escapeHtml(item.category)}</span></div>
             <div class="checklist-item-title">${escapeHtml(item.title)}</div>
             <div class="checklist-item-desc">${escapeHtml(item.desc)}</div>
           </div>
+          ${isCustom ? `<button class="btn-item-delete" data-del="${item.id}" title="削除">✕</button>` : ''}
         </div>
         <div class="checklist-actions">
-          <button type="button" class="check-btn btn-check-success ${item.status === 'checked' ? 'active' : ''}" data-id="${item.id}" data-status="checked">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            確認済み
-          </button>
-          <button type="button" class="check-btn btn-check-danger ${item.status === 'issue' ? 'active' : ''}" data-id="${item.id}" data-status="issue">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            問題あり
-          </button>
-          <button type="button" class="check-btn btn-check-warning ${item.status === 'unknown' ? 'active' : ''}" data-id="${item.id}" data-status="unknown">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            分からない
-          </button>
+          <button type="button" class="check-btn btn-check-success ${item.status === 'checked' ? 'active' : ''}" data-id="${item.id}" data-st="checked">✓ 確認済み</button>
+          <button type="button" class="check-btn btn-check-danger ${item.status === 'issue' ? 'active' : ''}" data-id="${item.id}" data-st="issue">⚠️ 問題あり</button>
+          <button type="button" class="check-btn btn-check-warning ${item.status === 'unknown' ? 'active' : ''}" data-id="${item.id}" data-st="unknown">❓ 分からない</button>
         </div>
+        ${(item.status === 'issue' || item.status === 'unknown') ? `
+          <div class="checklist-inline-issue">
+            <label class="inline-input-label">${item.status === 'issue' ? '⚠️ 具体的な問題や症状を入力:' : '❓ 分からない点・確認したいこと:'}</label>
+            <input type="text" class="form-control inline-issue-input" data-id="${item.id}" placeholder="${item.status === 'issue' ? '例: ファイル名に日本語が入るとエラーになる' : '例: このボタンを押したときの正常動作を知りたい'}" value="${escapeHtml(item.issueDetail || '')}">
+            ${item.status === 'issue' ? `
+              <div class="input-presets" style="margin-top: 6px;">
+                <span class="preset-title">入力例:</span>
+                <button type="button" class="preset-tag inline-tag" data-id="${item.id}" data-val="ファイル名に日本語が入ると失敗する">日本語で失敗する</button>
+                <button type="button" class="preset-tag inline-tag" data-id="${item.id}" data-val="この機能はいらない">この機能はいらない</button>
+                <button type="button" class="preset-tag inline-tag" data-id="${item.id}" data-val="想定した結果と違う">想定した結果と違う</button>
+              </div>` : ''}
+          </div>` : ''}
       `;
-
       checklistContainer.appendChild(card);
     });
 
-    checkedCountEl.textContent = checkedCount;
-    totalCountEl.textContent = state.checklist.length;
+    const total = state.checklist.length;
+    const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+    checkedCountEl.textContent = completedCount;
+    totalCountEl.textContent = total;
+    meterPercent.textContent = `${pct}%`;
+    meterFill.style.width = `${pct}%`;
 
-    // Attach click events
-    document.querySelectorAll('.check-btn').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const id = btn.getAttribute('data-id');
-        const newStatus = btn.getAttribute('data-status');
-        const targetItem = state.checklist.find((it) => it.id === id);
+    document.querySelectorAll('.check-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = state.checklist.find(it => it.id === btn.getAttribute('data-id'));
+        const st = btn.getAttribute('data-st');
+        if (item) { item.status = item.status === st ? 'none' : st; renderChecklist(); }
+      });
+    });
 
-        if (targetItem) {
-          // トグル（同じボタンを再度押したら解除）
-          targetItem.status = targetItem.status === newStatus ? 'none' : newStatus;
-          renderChecklist();
-        }
+    document.querySelectorAll('.inline-issue-input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const item = state.checklist.find(it => it.id === inp.getAttribute('data-id'));
+        if (item) item.issueDetail = e.target.value;
+      });
+    });
+
+    document.querySelectorAll('.inline-tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        const item = state.checklist.find(it => it.id === tag.getAttribute('data-id'));
+        if (item) { item.issueDetail = tag.getAttribute('data-val'); renderChecklist(); }
+      });
+    });
+
+    document.querySelectorAll('.btn-item-delete').forEach(delBtn => {
+      delBtn.addEventListener('click', () => {
+        state.checklist = state.checklist.filter(it => it.id !== delBtn.getAttribute('data-del'));
+        renderChecklist();
+        showToast('項目を削除しました');
       });
     });
   }
 
-  // Custom Item Form Toggle
-  toggleAddCustom.addEventListener('click', () => {
-    customItemForm.classList.toggle('hidden');
-    if (!customItemForm.classList.contains('hidden')) {
-      customItemTitle.focus();
-    }
+  const customForm = document.getElementById('custom-item-form');
+  const customTitle = document.getElementById('custom-item-title');
+  document.getElementById('toggle-add-custom').addEventListener('click', () => {
+    customForm.classList.toggle('hidden');
+    if (!customForm.classList.contains('hidden')) customTitle.focus();
   });
 
-  addCustomBtn.addEventListener('click', () => {
-    const title = customItemTitle.value.trim();
-    if (!title) return;
-
-    state.checklist.push({
-      id: 'custom-' + Date.now(),
-      category: 'カスタム',
-      title: title,
-      desc: '個別に追加された動作確認項目です。',
-      status: 'none',
-      issueDetail: ''
-    });
-
-    customItemTitle.value = '';
-    customItemForm.classList.add('hidden');
+  document.getElementById('add-custom-btn').addEventListener('click', () => {
+    const val = customTitle.value.trim();
+    if (!val) return;
+    state.checklist.push({ id: 'custom-' + Date.now(), category: 'カスタム', title: val, desc: '個別に追加された動作確認項目です。', status: 'none', issueDetail: '' });
+    customTitle.value = '';
+    customForm.classList.add('hidden');
     renderChecklist();
     showToast('確認項目を追加しました');
   });
 
-  step3BackBtn.addEventListener('click', () => switchScreen(2));
-  step3NextBtn.addEventListener('click', () => switchScreen(4));
+  document.getElementById('step3-back-btn').addEventListener('click', () => switchScreen(2));
+  document.getElementById('step3-next-btn').addEventListener('click', () => switchScreen(4));
 
-  // ==========================================================================
-  // Step 4: Result Screen & Fix Prompt Generation
-  // ==========================================================================
   function renderResultScreen() {
-    const issues = state.checklist.filter((item) => item.status === 'issue');
-    const unknowns = state.checklist.filter((item) => item.status === 'unknown');
+    const issues = state.checklist.filter(it => it.status === 'issue');
+    const unknowns = state.checklist.filter(it => it.status === 'unknown');
+    const isSuccess = issues.length === 0 && unknowns.length === 0;
 
-    if (issues.length === 0 && unknowns.length === 0) {
-      // 成功画面
-      resultSuccessContainer.classList.remove('hidden');
-      resultIssuesContainer.classList.add('hidden');
-    } else {
-      // 問題あり・要確認画面
-      resultSuccessContainer.classList.add('hidden');
-      resultIssuesContainer.classList.remove('hidden');
-
-      issueCountTag.textContent = `⚠️ 問題あり: ${issues.length}件`;
-      unknownCountTag.textContent = `❓ 分からない: ${unknowns.length}件`;
-
-      renderIssueDetailInputs(issues, unknowns);
-      updateFixPrompt();
-    }
-  }
-
-  function renderIssueDetailInputs(issues, unknowns) {
-    issueInputsContainer.innerHTML = '';
-    const allProblemItems = [...issues, ...unknowns];
-
-    allProblemItems.forEach((item) => {
-      const isIssue = item.status === 'issue';
-      const container = document.createElement('div');
-      container.className = 'issue-detail-item';
-
-      const icon = isIssue ? '⚠️' : '❓';
-      const badgeClass = isIssue ? 'red' : 'yellow';
-      const placeholder = isIssue
-        ? '例: ファイル名に日本語が含まれているとエラーで止まってしまう'
-        : '例: このボタンを押したときに何が起きるのが正常なのか確認したい';
-
-      container.innerHTML = `
-        <div class="issue-item-header">
-          <span>${icon} [${escapeHtml(item.category)}] ${escapeHtml(item.title)}</span>
-        </div>
-        <input type="text" class="form-control issue-input" data-id="${item.id}"
-          placeholder="${placeholder}"
-          value="${escapeHtml(item.issueDetail || '')}">
-      `;
-
-      issueInputsContainer.appendChild(container);
-    });
-
-    // 入力変更でプロンプト即時更新
-    document.querySelectorAll('.issue-input').forEach((input) => {
-      input.addEventListener('input', (e) => {
-        const id = input.getAttribute('data-id');
-        const target = state.checklist.find((it) => it.id === id);
-        if (target) {
-          target.issueDetail = input.value;
-          updateFixPrompt();
-        }
-      });
-    });
+    document.getElementById('result-success-container').classList.toggle('hidden', !isSuccess);
+    document.getElementById('result-issues-container').classList.toggle('hidden', isSuccess);
+    if (!isSuccess) updateFixPrompt();
   }
 
   function updateFixPrompt() {
-    const issues = state.checklist.filter((item) => item.status === 'issue');
-    const unknowns = state.checklist.filter((item) => item.status === 'unknown');
-
-    let issuesText = '';
+    const issues = state.checklist.filter(it => it.status === 'issue');
+    const unknowns = state.checklist.filter(it => it.status === 'unknown');
+    let text = '';
 
     if (issues.length > 0) {
-      issuesText += '【問題があった項目】\n';
-      issues.forEach((it, idx) => {
-        const detail = it.issueDetail.trim() ? ` -> 症状: ${it.issueDetail.trim()}` : '';
-        issuesText += `${idx + 1}. [${it.category}] ${it.title}${detail}\n`;
+      text += '【問題があった項目】\n';
+      issues.forEach((it, i) => {
+        const d = it.issueDetail.trim() ? ` -> 症状: ${it.issueDetail.trim()}` : '';
+        text += `${i + 1}. [${it.category}] ${it.title}${d}\n`;
       });
-      issuesText += '\n';
+      text += '\n';
     }
-
     if (unknowns.length > 0) {
-      issuesText += '【判断がつかない・確認したい項目】\n';
-      unknowns.forEach((it, idx) => {
-        const detail = it.issueDetail.trim() ? ` -> 疑問点: ${it.issueDetail.trim()}` : '';
-        issuesText += `${idx + 1}. [${it.category}] ${it.title}${detail}\n`;
+      text += '【確認したい・分からない項目】\n';
+      unknowns.forEach((it, i) => {
+        const d = it.issueDetail.trim() ? ` -> 疑問点: ${it.issueDetail.trim()}` : '';
+        text += `${i + 1}. [${it.category}] ${it.title}${d}\n`;
       });
-      issuesText += '\n';
+      text += '\n';
     }
 
-    const promptText = `作成してもらった以下のソフトウェアを実際に動かして確認したところ、修正または確認したい点が見つかりました。
+    aiFixPrompt.value = `作成してもらった以下のソフトウェアを実際に動かして確認したところ、修正または確認したい点が見つかりました。
 内容を確認し、修正方法または正常な動作仕様について教えてください。
 
 【ソフトウェア】
@@ -447,56 +260,33 @@ ${state.product}
 【本来の目的】
 ${state.purpose}
 
-${issuesText.trim()}
+${text.trim()}
 
 修正が必要な場合は、該当箇所のコード修正案と変更理由を分かりやすく教えてください。`;
-
-    aiFixPrompt.value = promptText;
   }
 
-  copyFixPromptBtn.addEventListener('click', () => {
-    copyToClipboard(aiFixPrompt.value, 'AIへの修正・確認依頼文をコピーしました！');
-  });
+  document.getElementById('copy-fix-prompt-btn').addEventListener('click', () => copyText(aiFixPrompt.value, 'AIへの修正依頼文をコピーしました！'));
+  document.getElementById('reset-fix-prompt-btn').addEventListener('click', () => { updateFixPrompt(); showToast('初期文に戻しました'); });
+  document.getElementById('step4-back-btn').addEventListener('click', () => switchScreen(3));
+  document.getElementById('step4-restart-btn').addEventListener('click', resetApp);
+  document.getElementById('finish-btn').addEventListener('click', resetApp);
+  document.getElementById('hero-start-btn').addEventListener('click', () => switchScreen(1));
 
-  step4BackBtn.addEventListener('click', () => switchScreen(3));
-  step4RestartBtn.addEventListener('click', () => resetApp());
-  finishBtn.addEventListener('click', () => resetApp());
-
-  // ==========================================================================
-  // Reset & Navigation
-  // ==========================================================================
   function resetApp() {
-    state.product = '';
-    state.purpose = '';
-    inputProduct.value = '';
-    inputPurpose.value = '';
-    state.checklist.forEach((item) => {
-      item.status = 'none';
-      item.issueDetail = '';
-    });
-    // カスタム項目をクリアして初期項目のみに
-    state.checklist = state.checklist.filter((item) => !item.id.startsWith('custom-'));
+    state.product = ''; state.purpose = '';
+    inputProduct.value = ''; inputPurpose.value = '';
+    state.checklist = JSON.parse(JSON.stringify(defaultItems));
     switchScreen(0);
     showToast('初期状態にリセットしました');
   }
 
-  heroStartBtn.addEventListener('click', () => switchScreen(1));
-  resetBtn.addEventListener('click', () => {
-    if (confirm('最初からやり直しますか？ 入力内容はクリアされます。')) {
-      resetApp();
-    }
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('最初からやり直しますか？ 入力内容はクリアされます。')) resetApp();
   });
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+  function escapeHtml(s) {
+    return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
-  // 初期起動
   switchScreen(0);
 })();
