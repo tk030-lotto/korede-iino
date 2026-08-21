@@ -154,6 +154,19 @@ GitHub Pagesで利用できる無料Webツールとして公開します。
 
 ---
 
+
+---
+
+## オンラインで試す (GitHub Pages)
+
+本ツールはブラウザのみで動作する完全な静的Webアプリケーションです。以下のURLから直接ご利用いただけます：
+
+**[https://tk030-lotto.github.io/korede-iino/](https://tk030-lotto.github.io/korede-iino/)**
+
+### 自動デプロイ設定について
+本リポジトリは GitHub Actions (`.github/workflows/deploy.yml`) による自動デプロイに対応しています。
+`main` ブランチにプッシュされると自動的に GitHub Pages へ最新版が反映されます。
+
 ## ライセンス
 
 MIT License
