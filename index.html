@@ -76,7 +76,10 @@
           </div>
           <div class="card-body">
             <div class="form-group">
-              <label for="input-product" class="form-label"><span class="label-number">1</span>何を作りましたか？<span class="required-tag">必須</span></label>
+              <div class="form-label-row">
+                <label for="input-product" class="form-label"><span class="label-number">1</span>何を作りましたか？<span class="required-tag">必須</span></label>
+                <div class="input-meta"><span id="product-count" class="char-count">0文字</span><button type="button" class="btn-clear" id="clear-product-btn" title="クリア">消去</button></div>
+              </div>
               <input type="text" id="input-product" class="form-control" placeholder="例: ファイル名一括変更ツール、CSV集計Webアプリ">
               <div class="input-presets">
                 <span class="preset-title">入力例:</span>
@@ -86,7 +89,10 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="input-purpose" class="form-label"><span class="label-number">2</span>何をしたかったですか？（当初の目的）<span class="required-tag">必須</span></label>
+              <div class="form-label-row">
+                <label for="input-purpose" class="form-label"><span class="label-number">2</span>何をしたかったですか？（当初の目的）<span class="required-tag">必須</span></label>
+                <div class="input-meta"><span id="purpose-count" class="char-count">0文字</span><button type="button" class="btn-clear" id="clear-purpose-btn" title="クリア">消去</button></div>
+              </div>
               <textarea id="input-purpose" class="form-control" rows="3" placeholder="例: フォルダ内の大量の画像ファイル名を、日付＋連番にまとめて変更したかった"></textarea>
               <div class="input-presets">
                 <span class="preset-title">入力例:</span>
@@ -117,6 +123,7 @@
               <div class="prompt-box-header">
                 <span class="prompt-box-title">AIへの質問文（直接編集可能）</span>
                 <div class="prompt-box-actions">
+                  <button id="download-prompt-btn" class="btn-ghost btn-sm" title="テキスト保存">保存 (.txt)</button>
                   <button id="reset-prompt-btn" class="btn-ghost btn-sm" title="初期文に戻す">元に戻す</button>
                   <button id="copy-prompt-btn" class="btn-secondary btn-sm">コピーする</button>
                 </div>
@@ -211,6 +218,7 @@
               <div class="prompt-box-header">
                 <span class="prompt-box-title">AIへの修正・確認依頼プロンプト</span>
                 <div class="prompt-box-actions">
+                  <button id="download-fix-prompt-btn" class="btn-ghost btn-sm" title="テキスト保存">保存 (.txt)</button>
                   <button id="reset-fix-prompt-btn" class="btn-ghost btn-sm" title="初期文に戻す">元に戻す</button>
                   <button id="copy-fix-prompt-btn" class="btn-secondary btn-sm">コピーする</button>
                 </div>
