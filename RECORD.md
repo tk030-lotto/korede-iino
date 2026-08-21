@@ -27,3 +27,10 @@
 ## 2026-08-21: 初期リポジトリ作成・ルール同期
 - GitHubプライベートリポジトリ tk030-lotto/korede-iino を作成・連携。
 - 各種情報フォルダから開発ルール一括同期を実施。
+
+### 2026-08-21 17:10 - note記事・X兼用デモGIFアニメーションの生成と配置
+- **実施内容**:
+  - Playwrightを用いて「これでいいの？ツール」の全画面操作フロー（Hero -> プリセット入力 -> プロンプト生成 -> クリップボードコピー -> チェックリスト回答 -> ALL CLEARED完了画面）を高解像度収録。
+  - 16:9比率（960x540）、76フレーム、容量1.20MB（note上限10MB、X上限15MBに完全適合）の高品質GIFアニメーションを生成。
+  - ssets/korede_iino_demo.gif および C:\Users\tk030\Desktop\各種情報\Projects\これでいいの？ツール\korede_iino_demo.gif へ配置。
+  - README.md へデモGIFを埋め込み、GitHubへPush完了。
