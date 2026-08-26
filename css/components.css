@@ -212,3 +212,5 @@ textarea.form-control { resize: vertical; min-height: 75px; }
 }
 .toast-icon { color: var(--success); font-weight: 700; }
 .toast.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, 10px); }
+
+.footer-copyright { margin-top: 10px; }
