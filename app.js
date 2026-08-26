@@ -51,6 +51,9 @@
     try { document.execCommand('copy'); showToast(msg); } catch (e) { showToast('コピーに失敗しました'); }
     document.body.removeChild(ta);
   }
+  function sanitizeFilename(name) {
+    return (name || 'ツール').replace(/[\/\\:*?"<>|]/g, '_').trim() || 'ツール';
+  }
   function downloadTextFile(filename, content) {
     if (!content) return;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -86,13 +89,16 @@
   }
   inputProduct.addEventListener('input', validateStep1);
   inputPurpose.addEventListener('input', validateStep1);
-  document.getElementById('clear-product-btn').addEventListener('click', () => { inputProduct.value = ''; validateStep1(); inputProduct.focus(); });
-  document.getElementById('clear-purpose-btn').addEventListener('click', () => { inputPurpose.value = ''; validateStep1(); inputPurpose.focus(); });
+  const clearProd = document.getElementById('clear-product-btn');
+  if (clearProd) clearProd.addEventListener('click', () => { inputProduct.value = ''; validateStep1(); inputProduct.focus(); });
+  const clearPurp = document.getElementById('clear-purpose-btn');
+  if (clearPurp) clearPurp.addEventListener('click', () => { inputPurpose.value = ''; validateStep1(); inputPurpose.focus(); });
 
   document.querySelectorAll('.preset-tag').forEach(btn => {
     btn.addEventListener('click', () => {
-      const el = document.getElementById(btn.getAttribute('data-target'));
-      if (el) { el.value = btn.getAttribute('data-value'); el.dispatchEvent(new Event('input')); el.focus(); }
+      const targetId = btn.getAttribute('data-target') === 'product' ? 'input-product' : 'input-purpose';
+      const el = document.getElementById(targetId);
+      if (el) { el.value = btn.getAttribute('data-val') || ''; el.dispatchEvent(new Event('input')); el.focus(); }
     });
   });
   step1NextBtn.addEventListener('click', () => {
@@ -120,7 +126,7 @@ ${state.purpose}
   }
   document.getElementById('copy-prompt-btn').addEventListener('click', () => copyText(aiCheckPrompt.value, 'AIへの質問文をコピーしました！'));
   document.getElementById('reset-prompt-btn').addEventListener('click', () => { generateCheckPrompt(); showToast('初期文に戻しました'); });
-  document.getElementById('download-prompt-btn').addEventListener('click', () => downloadTextFile(`AIチェック依頼_${state.product || 'ツール'}.txt`, aiCheckPrompt.value));
+  document.getElementById('download-prompt-btn').addEventListener('click', () => downloadTextFile(`AIチェック依頼_${sanitizeFilename(state.product)}.txt`, aiCheckPrompt.value));
   document.getElementById('step2-back-btn').addEventListener('click', () => switchScreen(1));
   document.getElementById('step2-next-btn').addEventListener('click', () => switchScreen(3));
 
@@ -132,6 +138,9 @@ ${state.purpose}
       const card = document.createElement('div');
       card.className = `checklist-card status-${item.status}`;
       const isCustom = item.id.startsWith('custom-');
+      const isChk = item.status === 'checked';
+      const isIss = item.status === 'issue';
+      const isUnk = item.status === 'unknown';
       card.innerHTML = `
         <div class="checklist-card-top">
           <div>
@@ -142,15 +151,15 @@ ${state.purpose}
           ${isCustom ? `<button class="btn-item-delete" data-del="${item.id}" title="削除">✕</button>` : ''}
         </div>
         <div class="checklist-actions">
-          <button type="button" class="check-btn btn-check-success ${item.status === 'checked' ? 'active' : ''}" data-id="${item.id}" data-st="checked">✓ 確認済み</button>
-          <button type="button" class="check-btn btn-check-danger ${item.status === 'issue' ? 'active' : ''}" data-id="${item.id}" data-st="issue">⚠️ 問題あり</button>
-          <button type="button" class="check-btn btn-check-warning ${item.status === 'unknown' ? 'active' : ''}" data-id="${item.id}" data-st="unknown">❓ 分からない</button>
+          <button type="button" class="check-btn btn-check-success ${isChk ? 'active' : ''}" data-id="${item.id}" data-st="checked" aria-pressed="${isChk ? 'true' : 'false'}">✓ 確認済み</button>
+          <button type="button" class="check-btn btn-check-danger ${isIss ? 'active' : ''}" data-id="${item.id}" data-st="issue" aria-pressed="${isIss ? 'true' : 'false'}">⚠️ 問題あり</button>
+          <button type="button" class="check-btn btn-check-warning ${isUnk ? 'active' : ''}" data-id="${item.id}" data-st="unknown" aria-pressed="${isUnk ? 'true' : 'false'}">❓ 分からない</button>
         </div>
-        ${(item.status === 'issue' || item.status === 'unknown') ? `
+        ${(isIss || isUnk) ? `
           <div class="checklist-inline-issue">
-            <label class="inline-input-label">${item.status === 'issue' ? '⚠️ 具体的な問題や症状を入力:' : '❓ 分からない点・確認したいこと:'}</label>
-            <input type="text" class="form-control inline-issue-input" data-id="${item.id}" placeholder="${item.status === 'issue' ? '例: ファイル名に日本語が入るとエラーになる' : '例: このボタンを押したときの正常動作を知りたい'}" value="${escapeHtml(item.issueDetail || '')}">
-            ${item.status === 'issue' ? `
+            <label class="inline-input-label">${isIss ? '⚠️ 具体的な問題や症状を入力:' : '❓ 分からない点・確認したいこと:'}</label>
+            <input type="text" class="form-control inline-issue-input" data-id="${item.id}" placeholder="${isIss ? '例: ファイル名に日本語が入るとエラーになる' : '例: このボタンを押したときの正常動作を知りたい'}" value="${escapeHtml(item.issueDetail || '')}">
+            ${isIss ? `
               <div class="input-presets" style="margin-top: 6px;">
                 <span class="preset-title">入力例:</span>
                 <button type="button" class="preset-tag inline-tag" data-id="${item.id}" data-val="ファイル名に日本語が入ると失敗する">日本語で失敗する</button>
@@ -209,7 +218,8 @@ ${state.purpose}
   });
   function addCustomItem() {
     const val = customTitle.value.trim(); if (!val) return;
-    state.checklist.push({ id: 'custom-' + Date.now(), category: 'カスタム', title: val, desc: '個別に追加された動作確認項目です。', status: 'none', issueDetail: '' });
+    const uniqueId = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+    state.checklist.push({ id: uniqueId, category: 'カスタム', title: val, desc: '個別に追加された動作確認項目です。', status: 'none', issueDetail: '' });
     customTitle.value = ''; customForm.classList.add('hidden'); renderChecklist(); showToast('確認項目を追加しました');
   }
   document.getElementById('add-custom-btn').addEventListener('click', addCustomItem);
@@ -223,10 +233,21 @@ ${state.purpose}
   function renderResultScreen() {
     const issues = state.checklist.filter(it => it.status === 'issue');
     const unknowns = state.checklist.filter(it => it.status === 'unknown');
-    const isSuccess = issues.length === 0 && unknowns.length === 0;
-    document.getElementById('result-success-container').classList.toggle('hidden', !isSuccess);
-    document.getElementById('result-issues-container').classList.toggle('hidden', isSuccess);
-    if (!isSuccess) updateFixPrompt();
+    const unselected = state.checklist.filter(it => it.status === 'none');
+    const checked = state.checklist.filter(it => it.status === 'checked');
+
+    const isSuccess = issues.length === 0 && unknowns.length === 0 && unselected.length === 0 && checked.length > 0;
+    const isIncomplete = unselected.length > 0 && issues.length === 0 && unknowns.length === 0;
+
+    const successBox = document.getElementById('result-success-container');
+    const incompleteBox = document.getElementById('result-incomplete-container');
+    const issuesBox = document.getElementById('result-issues-container');
+
+    if (successBox) successBox.classList.toggle('hidden', !isSuccess);
+    if (incompleteBox) incompleteBox.classList.toggle('hidden', !isIncomplete);
+    if (issuesBox) issuesBox.classList.toggle('hidden', isSuccess || isIncomplete);
+
+    if (!isSuccess && !isIncomplete) updateFixPrompt();
   }
   function updateFixPrompt() {
     const issues = state.checklist.filter(it => it.status === 'issue');
@@ -263,9 +284,11 @@ ${text.trim()}
   }
   document.getElementById('copy-fix-prompt-btn').addEventListener('click', () => copyText(aiFixPrompt.value, 'AIへの修正依頼文をコピーしました！'));
   document.getElementById('reset-fix-prompt-btn').addEventListener('click', () => { updateFixPrompt(); showToast('初期文に戻しました'); });
-  document.getElementById('download-fix-prompt-btn').addEventListener('click', () => downloadTextFile(`AI修正依頼_${state.product || 'ツール'}.txt`, aiFixPrompt.value));
+  document.getElementById('download-fix-prompt-btn').addEventListener('click', () => downloadTextFile(`AI修正依頼_${sanitizeFilename(state.product)}.txt`, aiFixPrompt.value));
   document.getElementById('step4-back-btn').addEventListener('click', () => switchScreen(3));
   document.getElementById('step4-restart-btn').addEventListener('click', resetApp);
+  const incBackBtn = document.getElementById('incomplete-back-btn');
+  if (incBackBtn) incBackBtn.addEventListener('click', () => switchScreen(3));
   document.getElementById('finish-btn').addEventListener('click', resetApp);
   document.getElementById('hero-start-btn').addEventListener('click', () => switchScreen(1));
 

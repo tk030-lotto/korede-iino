@@ -3,12 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090d16">
+  <meta name="color-scheme" content="dark">
   <title>これでいいの？ - AI開発チェックアシスタント</title>
   <meta name="description" content="AIが作成したソフトウェアを実際に使って確認するためのチェック項目を整理するWebツール">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✅</text></svg>">
   <meta property="og:title" content="これでいいの？ - AI開発チェックアシスタント">
   <meta property="og:description" content="AIが作ったソフトウェア、本当にこれでいい？実際に動かして検証するチェックリスト生成ツール">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:url" content="https://tk030-lotto.github.io/korede-iino/">
+  <meta property="og:image" content="https://tk030-lotto.github.io/korede-iino/assets/korede_iino_demo.gif">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://tk030-lotto.github.io/korede-iino/assets/korede_iino_demo.gif">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,9 +45,9 @@
         <div class="step-line"></div>
         <div class="step-indicator" data-step="1"><div class="step-dot">2</div><span class="step-label">AIチェック依頼</span></div>
         <div class="step-line"></div>
-        <div class="step-indicator" data-step="2"><div class="step-dot">3</div><span class="step-label">確認・検証</span></div>
+        <div class="step-indicator" data-step="2"><div class="step-dot">3</div><span class="step-label">動作確認</span></div>
         <div class="step-line"></div>
-        <div class="step-indicator" data-step="3"><div class="step-dot">4</div><span class="step-label">判定・修正</span></div>
+        <div class="step-indicator" data-step="3"><div class="step-dot">4</div><span class="step-label">結果・次のステップ</span></div>
       </div>
     </div>
 
@@ -84,9 +90,9 @@
               <input type="text" id="input-product" class="form-control" placeholder="例: ファイル名一括変更ツール、CSV集計Webアプリ">
               <div class="input-presets">
                 <span class="preset-title">入力例:</span>
-                <button type="button" class="preset-tag" data-target="input-product" data-value="ファイル名一括変更ツール">ファイル名一括変更ツール</button>
-                <button type="button" class="preset-tag" data-target="input-product" data-value="CSV集計Webアプリ">CSV集計Webアプリ</button>
-                <button type="button" class="preset-tag" data-target="input-product" data-value="画像リサイズツール">画像リサイズツール</button>
+                <button type="button" class="preset-tag" data-target="input-product" data-val="ファイル名一括変更ツール">ファイル名一括変更ツール</button>
+                <button type="button" class="preset-tag" data-target="input-product" data-val="CSV集計Webアプリ">CSV集計Webアプリ</button>
+                <button type="button" class="preset-tag" data-target="input-product" data-val="画像リサイズツール">画像リサイズツール</button>
               </div>
             </div>
             <div class="form-group">
@@ -97,8 +103,8 @@
               <textarea id="input-purpose" class="form-control" rows="3" placeholder="例: フォルダ内の大量の画像ファイル名を、日付＋連番にまとめて変更したかった"></textarea>
               <div class="input-presets">
                 <span class="preset-title">入力例:</span>
-                <button type="button" class="preset-tag" data-target="input-purpose" data-value="フォルダ内の大量のファイル名を、日付と連番でまとめて一括変更したい">ファイル名の一括変更</button>
-                <button type="button" class="preset-tag" data-target="input-purpose" data-value="CSVファイルをアップロードしたら合計値やグラフを自動で表示させたい">CSV自動集計・グラフ化</button>
+                <button type="button" class="preset-tag" data-target="input-purpose" data-val="フォルダ内の大量のファイル名を、日付と連番でまとめて一括変更したい">ファイル名の一括変更</button>
+                <button type="button" class="preset-tag" data-target="input-purpose" data-val="CSVファイルをアップロードしたら合計値やグラフを自動で表示させたい">CSV自動集計・グラフ化</button>
               </div>
             </div>
           </div>
@@ -111,7 +117,7 @@
         </div>
       </section>
 
-      <!-- SCREEN 2: Prompt -->
+      <!-- SCREEN 2: AI Check Prompt -->
       <section id="screen-prompt" class="screen-view">
         <div class="card">
           <div class="card-header">
@@ -165,7 +171,7 @@
             </div>
             <div class="checklist-container" id="checklist-items"></div>
             <div class="add-custom-item-section">
-              <div class="add-item-toggle" id="toggle-add-custom">+ AIから提案された項目や独自の確認項目を追加する</div>
+              <button type="button" class="add-item-toggle" id="toggle-add-custom">+ AIから提案された項目や独自の確認項目を追加する</button>
               <div class="add-custom-form hidden" id="custom-item-form">
                 <input type="text" id="custom-item-title" class="form-control" placeholder="確認項目名（例: 特殊文字や50MB以上のファイル）">
                 <button type="button" id="add-custom-btn" class="btn-secondary">追加</button>
@@ -197,13 +203,32 @@
                 <ul>
                   <li><strong>GitHub等でバックアップ:</strong> 作成したファイルをGitでコミット・保存しましょう。</li>
                   <li><strong>日常・実務で使ってみる:</strong> 実際のデータや作業でどんどん使ってみましょう。</li>
-                  <li><strong>シリーズ次回作:</strong> 第7弾『公開してみよう。』でWeb上に公開してみましょう。</li>
+                  <li><strong>シリーズ次回作:</strong> 第6作『公開してみよう。』でWeb上に公開してみましょう。</li>
                 </ul>
               </div>
             </div>
           </div>
           <div class="card-footer center">
             <button id="finish-btn" class="btn-primary">別のソフトウェアをチェックする</button>
+          </div>
+        </div>
+
+        <!-- Incomplete Case: 未判定の項目が残っている場合 -->
+        <div id="result-incomplete-container" class="card result-card incomplete-card hidden">
+          <div class="result-icon-banner warning"><div class="result-icon-circle">ℹ️</div></div>
+          <div class="card-header text-center">
+            <span class="badge-status-warning">UNCHECKED ITEMS</span>
+            <h2 class="result-title">未確認の項目が残っています</h2>
+            <p class="card-subtitle">すべての項目を実際に動かして「確認済み」または「問題あり」を判定してください。</p>
+          </div>
+          <div class="card-body">
+            <div class="info-tip-box">
+              <span>⚠️</span>
+              <div>AIで作ったソフトウェアは、実際に触って動作を試すことで初めて意図通り動くかどうかが分かります。前の画面に戻り、各項目を確認してみましょう。</div>
+            </div>
+          </div>
+          <div class="card-footer center">
+            <button id="incomplete-back-btn" class="btn-primary">チェック項目に戻って確認する</button>
           </div>
         </div>
 
@@ -244,10 +269,10 @@
         <div class="series-banner-title">📚 躊躇してないで、とにかく作ってみよう。シリーズ</div>
         <div class="series-banner-list">①何を作るか決めよう ➔ ②AIに聞いてみよう ➔ ③まず動かしてみよう ➔ ④エラーで止まらない ➔ ⑤<b>これでいいの？</b> ➔ ⑥公開してみよう</div>
       </div>
-      <p style="margin-top: 10px;">© 2026 これでいいの？ - AI開発チェックアシスタント | MIT License</p>
+      <p class="footer-copyright">© 2026 これでいいの？ - AI開発チェックアシスタント | MIT License</p>
     </footer>
 
-    <div id="toast" class="toast hidden"><span class="toast-icon">✓</span><span class="toast-message" id="toast-text">コピーしました</span></div>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"><span class="toast-icon">✓</span><span class="toast-message" id="toast-text">コピーしました</span></div>
   </div>
   <script src="app.js"></script>
 </body>

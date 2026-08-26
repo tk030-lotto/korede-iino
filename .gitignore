@@ -17,6 +17,7 @@ Thumbs.db
 
 # デモ用などの大容量メディア・圧縮ファイル
 *.gif
+!assets/korede_iino_demo.gif
 *.webp
 *.mp4
 *.zip
