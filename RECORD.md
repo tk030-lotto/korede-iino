@@ -1,5 +1,12 @@
 # これでいいの？ツール 開発記録 (RECORD)
 
+## 2026-08-27: GitHubリポジトリ About（概要欄）の設定
+- リポジトリ（`tk030-lotto/korede-iino`）の About 情報を設定:
+  - **Description**: 「AIに作ってもらったものを、そのまま完成品にしないためのチェック・修正依頼プロンプト生成Webツール」
+  - **Homepage URL**: `https://tk030-lotto.github.io/korede-iino/`
+  - **Topics**: `ai`, `prompt-engineering`, `chatgpt`, `claude`, `web-app`, `tools`, `javascript`, `zero-dependency`
+
+
 ## 2026-08-27: note下書き記事へのURL・リポジトリ・ハッシュタグ追記
 - `「これでいいの？」AIに作ってもらったものを、そのまま完成品にしないための小さなツール.txt` を更新:
   - 見出し直下に GitHub Pages 公開URL を追記。
