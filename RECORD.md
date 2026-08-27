@@ -1,5 +1,13 @@
 # これでいいの？ツール 開発記録 (RECORD)
 
+## 2026-08-27: リポジトリのパブリック化およびGitHub Pages公開デプロイ
+- **リポジトリ公開**: GitHub CLI を使用して `tk030-lotto/korede-iino` の可視性を `private` から `public` に変更。
+- **GitHub Pages有効化・自動デプロイ**:
+  - GitHub Actions をビルドソースとして GitHub Pages を有効化。
+  - `.github/workflows/deploy.yml` を実行し、デプロイ完了（所要時間16秒）。
+  - 公開URL `https://tk030-lotto.github.io/korede-iino/` への HTTP 200 疎通確認および静的配信を確認。
+
+
 ## 2026-08-26: コードレビュー指摘事項（全16項目）の全面改修・完全適合
 - コードレビュー報告書（code_review_report.md）の全指摘事項を改修・適合:
   - **自動デプロイワークフロー新設**: `.github/workflows/deploy.yml` を作成し、main ブランチへの push に連動した GitHub Pages 自動デプロイを実装（README との不整合解消）。
