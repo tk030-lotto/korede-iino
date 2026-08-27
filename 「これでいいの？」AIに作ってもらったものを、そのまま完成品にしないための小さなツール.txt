@@ -1,6 +1,7 @@
 # 「これでいいの？」AIに作ってもらったものを、そのまま完成品にしないための小さなツール
 
-![これでいいの？ デモアニメーション](./assets/korede_iino_demo.gif)
+▼ ツールはこちら（無料・インストール不要・ブラウザで動作）
+https://tk030-lotto.github.io/korede-iino/
 
 AIにソフトウェアを作ってもらう。
 
@@ -329,7 +330,7 @@ GitHub Pagesで公開できる完全な静的Webアプリケーションとし�
 
 と思ったときに、ちょっと使ってみてください。
 
-[「これでいいの？」をブラウザで使う](https://tk030-lotto.github.io/korede-iino/?utm_source=chatgpt.com)
+[「これでいいの？」をブラウザで使う](https://tk030-lotto.github.io/korede-iino/)
 
 GitHub Actionsによる自動デプロイにも対応しており、`main` ブランチへの更新がGitHub Pagesへ反映される構成にしています。
 
@@ -367,3 +368,11 @@ AIに作ってもらう。
 **「これでいいの？」**
 
 です。
+
+---
+
+### リンク一覧
+- **ツール公開URL（GitHub Pages）**: https://tk030-lotto.github.io/korede-iino/
+- **GitHubリポジトリ**: https://github.com/tk030-lotto/korede-iino
+
+#AI #生成AI #個人開発 #Webツール #ChatGPT #Claude #プログラミング初心者 #AI開発 #GitHub

@@ -1,5 +1,11 @@
 # これでいいの？ツール 開発記録 (RECORD)
 
+## 2026-08-27: note下書き記事へのURL・リポジトリ・ハッシュタグ追記
+- `「これでいいの？」AIに作ってもらったものを、そのまま完成品にしないための小さなツール.txt` を更新:
+  - 見出し直下に GitHub Pages 公開URL を追記。
+  - 本文中のリンクURLを正規化。
+  - 記事末尾に GitHub Pages URL、GitHub リポジトリURL、ハッシュタグ（`#AI #生成AI #個人開発 #Webツール #ChatGPT #Claude #プログラミング初心者 #AI開発 #GitHub`）を追記。
+
 ## 2026-08-27: リポジトリのパブリック化およびGitHub Pages公開デプロイ
 - **リポジトリ公開**: GitHub CLI を使用して `tk030-lotto/korede-iino` の可視性を `private` から `public` に変更。
 - **GitHub Pages有効化・自動デプロイ**:
