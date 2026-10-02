@@ -24,3 +24,15 @@ Thumbs.db
 *.db
 *.db-shm
 *.db-wal
+
+# Internal operational files (Common Rules)
+AI_RULES.md
+SKILLS.md
+.cursorrules
+.clauderules
+.clinerules
+.github/copilot-instructions.md
+.agents/
+knowledge/
+RECORD.md
+
