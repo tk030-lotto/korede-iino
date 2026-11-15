@@ -159,7 +159,7 @@ GitHub Pagesで利用できる無料Webツールとして公開します。
 
 ## オンラインで試す (GitHub Pages)
 
-本ツールはブラウザのみで動作する完全な静的Webアプリケーションです。以下のURLから直接ご利用いただけます：
+本ツールはブラウザのみで動作する静的Webアプリケーションです（フォントのみ Google Fonts から取得します。取得できない環境では表示フォントが変わりますが、機能はそのまま動作します）。以下のURLから直接ご利用いただけます：
 
 **[https://tk030-lotto.github.io/korede-iino/](https://tk030-lotto.github.io/korede-iino/)**
 

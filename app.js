@@ -30,6 +30,14 @@
   const meterFill = document.getElementById('meter-fill');
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toast-text');
+  const resetBtn = document.getElementById('reset-btn');
+  const resetModal = document.getElementById('reset-modal');
+  const resetCancelBtn = document.getElementById('reset-cancel-btn');
+  const resetConfirmBtn = document.getElementById('reset-confirm-btn');
+  const promptCache = {
+    check: { generated: null, source: null },
+    fix: { generated: null, source: null }
+  };
   let toastTimer = null;
 
   function showToast(msg) {
@@ -69,7 +77,7 @@
     Object.values(screens).forEach(s => s.classList.remove('active'));
     if (step === 0) screens.hero.classList.add('active');
     if (step === 1) { screens.input.classList.add('active'); validateStep1(); }
-    if (step === 2) { generateCheckPrompt(); screens.prompt.classList.add('active'); }
+    if (step === 2) { ensurePromptUpToDate(aiCheckPrompt, promptCache.check, getCheckSourceSnapshot, generateCheckPrompt); screens.prompt.classList.add('active'); }
     if (step === 3) { renderChecklist(); screens.checklist.classList.add('active'); }
     if (step === 4) { renderResultScreen(); screens.result.classList.add('active'); }
     progressContainer.classList.toggle('visible', step > 0);
@@ -96,14 +104,35 @@
 
   document.querySelectorAll('.preset-tag').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target') === 'product' ? 'input-product' : 'input-purpose';
-      const el = document.getElementById(targetId);
+      const el = document.getElementById(btn.getAttribute('data-target'));
       if (el) { el.value = btn.getAttribute('data-val') || ''; el.dispatchEvent(new Event('input')); el.focus(); }
     });
   });
   step1NextBtn.addEventListener('click', () => {
     state.product = inputProduct.value.trim(); state.purpose = inputPurpose.value.trim(); switchScreen(2);
   });
+  function getCheckSourceSnapshot() {
+    return JSON.stringify({ product: state.product, purpose: state.purpose });
+  }
+  function getFixSourceSnapshot() {
+    const items = state.checklist
+      .filter(it => it.status === 'issue' || it.status === 'unknown')
+      .map(it => ({
+        id: it.id,
+        category: it.category,
+        title: it.title,
+        status: it.status,
+        detail: (it.issueDetail || '').trim()
+      }));
+    return JSON.stringify({ product: state.product, purpose: state.purpose, items });
+  }
+  function ensurePromptUpToDate(el, cacheEntry, getSource, generateFn) {
+    const currentSource = getSource();
+    const hasManualEdit = cacheEntry.generated !== null && el.value !== cacheEntry.generated;
+    if (!hasManualEdit || currentSource !== cacheEntry.source) {
+      generateFn();
+    }
+  }
   function generateCheckPrompt() {
     aiCheckPrompt.value = `以下のソフトウェア（作成物）をAIに作ってもらいました。
 ソースコードを読むのではなく、「実際に動かして動作確認を行うためのチェック項目リスト」を作成してください。
@@ -123,6 +152,8 @@ ${state.purpose}
 6. エラー発生時に分かりやすいメッセージが出るか
 
 実際に操作しながら1つずつチェックできるよう、分かりやすい箇条書きで具体的に教えてください。`;
+    promptCache.check.generated = aiCheckPrompt.value;
+    promptCache.check.source = getCheckSourceSnapshot();
   }
   document.getElementById('copy-prompt-btn').addEventListener('click', () => copyText(aiCheckPrompt.value, 'AIへの質問文をコピーしました！'));
   document.getElementById('reset-prompt-btn').addEventListener('click', () => { generateCheckPrompt(); showToast('初期文に戻しました'); });
@@ -247,7 +278,7 @@ ${state.purpose}
     if (incompleteBox) incompleteBox.classList.toggle('hidden', !isIncomplete);
     if (issuesBox) issuesBox.classList.toggle('hidden', isSuccess || isIncomplete);
 
-    if (!isSuccess && !isIncomplete) updateFixPrompt();
+    if (!isSuccess && !isIncomplete) ensurePromptUpToDate(aiFixPrompt, promptCache.fix, getFixSourceSnapshot, updateFixPrompt);
   }
   function updateFixPrompt() {
     const issues = state.checklist.filter(it => it.status === 'issue');
@@ -281,6 +312,8 @@ ${state.purpose}
 ${text.trim()}
 
 修正が必要な場合は、該当箇所のコード修正案と変更理由を分かりやすく教えてください。`;
+    promptCache.fix.generated = aiFixPrompt.value;
+    promptCache.fix.source = getFixSourceSnapshot();
   }
   document.getElementById('copy-fix-prompt-btn').addEventListener('click', () => copyText(aiFixPrompt.value, 'AIへの修正依頼文をコピーしました！'));
   document.getElementById('reset-fix-prompt-btn').addEventListener('click', () => { updateFixPrompt(); showToast('初期文に戻しました'); });
@@ -295,11 +328,39 @@ ${text.trim()}
   function resetApp() {
     state.product = ''; state.purpose = '';
     inputProduct.value = ''; inputPurpose.value = '';
+    aiCheckPrompt.value = ''; aiFixPrompt.value = '';
+    promptCache.check = { generated: null, source: null };
+    promptCache.fix = { generated: null, source: null };
     state.checklist = JSON.parse(JSON.stringify(defaultItems));
     switchScreen(0); showToast('初期状態にリセットしました');
   }
-  document.getElementById('reset-btn').addEventListener('click', () => {
-    if (confirm('最初からやり直しますか？ 入力内容はクリアされます。')) resetApp();
+  function openResetModal() {
+    if (!resetModal) return;
+    resetModal.classList.remove('hidden');
+    if (resetCancelBtn) resetCancelBtn.focus();
+  }
+  function closeResetModal() {
+    if (!resetModal) return;
+    resetModal.classList.add('hidden');
+    if (resetBtn) resetBtn.focus();
+  }
+  if (resetBtn) resetBtn.addEventListener('click', openResetModal);
+  if (resetCancelBtn) resetCancelBtn.addEventListener('click', closeResetModal);
+  if (resetConfirmBtn) {
+    resetConfirmBtn.addEventListener('click', () => {
+      if (resetModal) resetModal.classList.add('hidden');
+      resetApp();
+    });
+  }
+  if (resetModal) {
+    resetModal.addEventListener('click', e => {
+      if (e.target === resetModal) closeResetModal();
+    });
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && resetModal && !resetModal.classList.contains('hidden')) {
+      closeResetModal();
+    }
   });
   function escapeHtml(s) {
     return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');

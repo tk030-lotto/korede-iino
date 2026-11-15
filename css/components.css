@@ -213,4 +213,17 @@ textarea.form-control { resize: vertical; min-height: 75px; }
 .toast-icon { color: var(--success); font-weight: 700; }
 .toast.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, 10px); }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 200;
+}
+.modal-backdrop.hidden { display: none; }
+.modal-card { width: 100%; max-width: 440px; }
+
 .footer-copyright { margin-top: 10px; }

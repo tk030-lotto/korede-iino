@@ -101,7 +101,8 @@
 }
 
 .result-card.hidden { display: none; }
-.result-icon-banner.success { padding: 20px 0 10px 0; display: flex; justify-content: center; }
+.result-icon-banner.success,
+.result-icon-banner.warning { padding: 20px 0 10px 0; display: flex; justify-content: center; }
 .result-icon-circle {
   width: 56px;
   height: 56px;
@@ -113,6 +114,10 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+.result-icon-banner.warning .result-icon-circle {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
 }
 .badge-status-success {
   display: inline-block;

@@ -272,6 +272,19 @@
       <p class="footer-copyright">© 2026 これでいいの？ - AI開発チェックアシスタント | MIT License</p>
     </footer>
 
+    <div id="reset-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title">
+      <div class="card modal-card">
+        <div class="card-header">
+          <h2 id="reset-modal-title">最初からやり直しますか？</h2>
+          <p class="card-subtitle">入力した作成物・目的・チェック結果・編集した文章はすべてクリアされます。</p>
+        </div>
+        <div class="card-footer space-between">
+          <button type="button" id="reset-cancel-btn" class="btn-ghost">キャンセル</button>
+          <button type="button" id="reset-confirm-btn" class="btn-primary">やり直す</button>
+        </div>
+      </div>
+    </div>
+
     <div id="toast" class="toast hidden" role="status" aria-live="polite"><span class="toast-icon">✓</span><span class="toast-message" id="toast-text">コピーしました</span></div>
   </div>
   <script src="app.js"></script>
