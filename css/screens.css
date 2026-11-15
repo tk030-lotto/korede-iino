@@ -28,8 +28,8 @@
 }
 .step-label { font-size: 0.72rem; color: var(--text-dim); font-weight: 500; }
 .step-indicator.active .step-dot {
-  background-color: var(--primary);
-  border-color: var(--primary);
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
   color: #fff;
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
 }

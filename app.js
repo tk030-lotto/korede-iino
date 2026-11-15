@@ -255,6 +255,7 @@ ${state.purpose}
   }
   document.getElementById('add-custom-btn').addEventListener('click', addCustomItem);
   customTitle.addEventListener('keydown', e => {
+    if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'Enter') { e.preventDefault(); addCustomItem(); }
     if (e.key === 'Escape') { customForm.classList.add('hidden'); }
   });
